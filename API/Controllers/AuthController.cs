@@ -13,7 +13,7 @@ public class AuthController(IMediator mediator) : BaseController(mediator)
 {
     [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<IResult> Register([FromBody] RegisterRequest request)
     {
         var command = new RegisterCommand(
             request.FullName,
@@ -23,11 +23,8 @@ public class AuthController(IMediator mediator) : BaseController(mediator)
 
         var result = await _mediator.Send(command);
 
-        if (result.IsFailure)
-        {
-            return result.Error.ToHttpResponse();
-        }
-
-        return Created($"/api/auth/register", result);
+        return result.IsSuccess
+            ? Results.Created($"/api/auth/register", result)
+            : result.ToProblemDetails();
     }
 }

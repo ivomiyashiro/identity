@@ -1,4 +1,5 @@
 using API.Extensions;
+using API.Middleware;
 using Application;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,7 +14,6 @@ builder.Services.AddControllers(options =>
 {
     options.UseGeneralRoutePrefix("/api");
 });
-
 
 // Add authentication and authorization
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
@@ -54,6 +54,9 @@ app.UseHttpsRedirection();
 
 // Serve static files from wwwroot (React build output)
 app.UseStaticFiles();
+
+// Use ProblemDetails for error responses
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // SPA fallback routing - serve index.html for client-side routes
 app.MapFallbackToFile("index.html");
