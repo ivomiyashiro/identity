@@ -14,7 +14,7 @@ public static class RoutePrefixExtensions
 
 public class RoutePrefixConvention(IRouteTemplateProvider route) : IApplicationModelConvention
 {
-    private readonly AttributeRouteModel _routePrefix = new AttributeRouteModel(route);
+    private readonly AttributeRouteModel _routePrefix = new(route);
 
     public void Apply(ApplicationModel application)
     {

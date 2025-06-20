@@ -32,7 +32,6 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
             var errorMessage = string.Join("; ", failures.Select(f => $"{f.PropertyName}: {f.ErrorMessage}"));
             var validationError = Error.Validation("Validation.Failed", errorMessage);
 
-            // If TResponse is a Result type, return a failure result
             if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition() == typeof(Result<>))
             {
                 var resultType = typeof(TResponse).GetGenericArguments()[0];

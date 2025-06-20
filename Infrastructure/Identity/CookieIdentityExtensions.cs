@@ -14,7 +14,7 @@ public static class CookieIdentityExtensions
             options.Cookie.SameSite = SameSiteMode.Strict;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             options.Cookie.IsEssential = true;
-            options.Cookie.MaxAge = TimeSpan.FromDays(60);
+            options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
             options.Cookie.Path = "/";
             options.SlidingExpiration = true;
         });

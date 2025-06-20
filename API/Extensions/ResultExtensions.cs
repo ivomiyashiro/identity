@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using SharedKernel.Result;
 
 namespace API.Extensions;
@@ -12,14 +11,44 @@ public static class ResultExtensions
             throw new InvalidOperationException();
         }
 
+        var extensions = new Dictionary<string, object?>();
+        var errors = ParseErrors(result.Error.Type, result.Error.Message);
+
+        if (errors != null)
+        {
+            extensions.Add("errors", errors);
+        }
+
         return Results.Problem(
-            statusCode: GetStatusCode(result.Error.Type),
-            title: GetTitle(result.Error.Type),
             type: GetType(result.Error.Type),
-            extensions: new Dictionary<string, object?>
-            {
-                { "errors", ParseErrors(result.Error.Message) }
-            }
+            title: GetTitle(result.Error.Type),
+            statusCode: GetStatusCode(result.Error.Type),
+            detail: GetDetail(result.Error.Type, result.Error.Message),
+            extensions: extensions.Count != 0 ? extensions : null
+        );
+    }
+
+    public static IResult ToProblemDetails<T>(this Result<T> result)
+    {
+        if (result.IsSuccess)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var extensions = new Dictionary<string, object?>();
+        var errors = ParseErrors(result.Error.Type, result.Error.Message);
+
+        if (errors != null)
+        {
+            extensions.Add("errors", errors);
+        }
+
+        return Results.Problem(
+            type: GetType(result.Error.Type),
+            title: GetTitle(result.Error.Type),
+            statusCode: GetStatusCode(result.Error.Type),
+            detail: GetDetail(result.Error.Type, result.Error.Message),
+            extensions: extensions.Count != 0 ? extensions : null
         );
     }
 
@@ -33,6 +62,15 @@ public static class ResultExtensions
             ErrorType.Forbidden => StatusCodes.Status403Forbidden,
             ErrorType.Conflict => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
+        };
+    }
+
+    private static string GetDetail(ErrorType errorType, string message)
+    {
+        return errorType switch
+        {
+            ErrorType.Validation => "Your request parameters didn't validate",
+            _ => message
         };
     }
 
@@ -62,9 +100,13 @@ public static class ResultExtensions
         };
     }
 
-    public static List<Dictionary<string, string>> ParseErrors(string errorString)
+    public static Dictionary<string, List<string>>? ParseErrors(ErrorType errorType, string errorString)
     {
-        var errors = new List<Dictionary<string, string>>();
+        // Only return errors for validation error types
+        if (errorType != ErrorType.Validation)
+            return null;
+
+        var errors = new Dictionary<string, List<string>>();
         var parts = errorString.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var part in parts)
@@ -73,16 +115,16 @@ public static class ResultExtensions
             var colonIndex = trimmed.IndexOf(':');
             if (colonIndex > 0)
             {
-                var field = trimmed.Substring(0, colonIndex).Trim();
-                var error = trimmed.Substring(colonIndex + 1).Trim();
-                errors.Add(new Dictionary<string, string>
-            {
-                { "field", field },
-                { "error", error }
-            });
+                var field = trimmed.Substring(0, colonIndex).Trim().ToLowerInvariant();
+                var errorMessage = trimmed.Substring(colonIndex + 1).Trim();
+
+                if (!errors.ContainsKey(field))
+                    errors[field] = [];
+
+                errors[field].Add(errorMessage);
             }
         }
 
-        return errors;
+        return errors.Count != 0 ? errors : null;
     }
 }

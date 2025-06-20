@@ -1,6 +1,9 @@
-﻿using Application.Interfaces;
+﻿using Domain.Repositories;
+using Domain.Services;
 using Infrastructure.Identity;
 using Infrastructure.Persistance;
+using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +24,9 @@ public static class DependencyInjection
 
         services.AddCookieIdentity();
 
-        services.AddScoped<IAuthService, AuthService>();
+        // Register domain repositories and services
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
 
         return services;
     }

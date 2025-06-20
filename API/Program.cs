@@ -9,10 +9,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add global exception handler
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 // Add controllers with a general route prefix
 builder.Services.AddControllers(options =>
 {
     options.UseGeneralRoutePrefix("/api");
+});
+
+// Configure routing to use lowercase URLs
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.LowercaseUrls = true;
+    options.LowercaseQueryStrings = true;
 });
 
 // Add authentication and authorization
@@ -45,7 +56,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Add global exception handling
-app.UseExceptionHandling();
+app.UseExceptionHandler();
 
 // Add base controller routing "api/[controller]"
 app.MapControllers();
@@ -54,9 +65,6 @@ app.UseHttpsRedirection();
 
 // Serve static files from wwwroot (React build output)
 app.UseStaticFiles();
-
-// Use ProblemDetails for error responses
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // SPA fallback routing - serve index.html for client-side routes
 app.MapFallbackToFile("index.html");
