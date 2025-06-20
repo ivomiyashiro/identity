@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistance;
 
-public class AppDbContext : IdentityDbContext<AppIdentityUser>
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppIdentityUser>(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
