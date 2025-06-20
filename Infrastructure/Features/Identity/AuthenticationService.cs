@@ -1,16 +1,15 @@
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.Services;
-using Infrastructure.Identity;
+using Infrastructure.Features.Identity.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Features.Identity;
 
 public class AuthenticationService(
     UserManager<AppIdentityUser> userManager,
@@ -51,10 +50,10 @@ public class AuthenticationService(
         return result.Succeeded;
     }
 
-    public async Task ForgotPasswordAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<string?> ForgotPasswordAsync(string email, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
-        if (user == null) return; // Don't reveal if user exists
+        if (user == null) return null;
 
         var otp = GenerateOtp();
         user.PasswordResetOtp = otp;
@@ -63,8 +62,7 @@ public class AuthenticationService(
 
         await _userRepository.UpdateAsync(user, cancellationToken);
 
-        // TODO: Send email with OTP
-        // await _emailService.SendPasswordResetOtpAsync(email, otp);
+        return otp;
     }
 
     public async Task<string?> VerifyResetOtpAsync(string email, string otp, CancellationToken cancellationToken = default)

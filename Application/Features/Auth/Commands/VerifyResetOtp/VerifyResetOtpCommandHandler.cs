@@ -16,7 +16,7 @@ public class VerifyResetOtpCommandHandler(IAuthenticationService authenticationS
         if (resetToken == null)
         {
             return Result.Failure<VerifyResetOtpCommandResponse>(
-                Error.Validation("Auth.InvalidOtp", "Invalid or expired OTP."));
+                Error.Conflict("Auth.InvalidOtp", "Invalid or expired OTP."));
         }
 
         var response = new VerifyResetOtpCommandResponse(resetToken, DateTime.UtcNow.AddMinutes(30));

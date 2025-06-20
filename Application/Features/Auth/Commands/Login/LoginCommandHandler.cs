@@ -16,13 +16,13 @@ public class LoginCommandHandler(IUserRepository userRepository, IAuthentication
         var isValid = await _authenticationService.ValidateCredentialsAsync(request.Email, request.Password, cancellationToken);
         if (!isValid)
         {
-            return Result.Failure<LoginCommandResponse>(Error.Validation("Auth.InvalidCredentials", "Invalid email or password"));
+            return Result.Failure<LoginCommandResponse>(Error.Conflict("Auth.InvalidCredentials", "Invalid email or password"));
         }
 
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user == null)
         {
-            return Result.Failure<LoginCommandResponse>(Error.Validation("Auth.UserNotFound", "User not found"));
+            return Result.Failure<LoginCommandResponse>(Error.Conflict("Auth.UserNotFound", "User not found"));
         }
 
         return Result.Success(new LoginCommandResponse(user.Id, user.FullName, user.Email, user.CreatedAt));

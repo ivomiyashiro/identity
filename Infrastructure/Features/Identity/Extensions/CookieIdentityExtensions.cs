@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Identity;
+namespace Infrastructure.Features.Identity.Extensions;
 
 public static class CookieIdentityExtensions
 {

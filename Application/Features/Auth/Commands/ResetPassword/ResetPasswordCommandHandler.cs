@@ -16,7 +16,7 @@ public class ResetPasswordCommandHandler(IAuthenticationService authenticationSe
         if (!success)
         {
             return Result.Failure<ResetPasswordCommandResponse>(
-                Error.Validation("Auth.InvalidResetToken", "Invalid or expired reset token."));
+                Error.Unauthorized("Auth.InvalidResetToken", "Invalid or expired reset token."));
         }
 
         return Result.Success(new ResetPasswordCommandResponse("Password reset successfully."));

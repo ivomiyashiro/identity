@@ -1,9 +1,10 @@
 using Domain.Entities;
 using Domain.Repositories;
-using Infrastructure.Identity;
+using Infrastructure.Features.Identity;
+using Infrastructure.Features.Identity.Extensions;
 using Microsoft.AspNetCore.Identity;
 
-namespace Infrastructure.Repositories;
+namespace Infrastructure.Persistance.Repositories;
 
 public class UserRepository(UserManager<AppIdentityUser> userManager) : IUserRepository
 {
@@ -35,6 +36,9 @@ public class UserRepository(UserManager<AppIdentityUser> userManager) : IUserRep
             identityUser.FullName = user.FullName;
             identityUser.Email = user.Email;
             identityUser.UserName = user.Email;
+            identityUser.PasswordResetOtp = user.PasswordResetOtp;
+            identityUser.OtpExpiresAt = user.OtpExpiresAt;
+            identityUser.OtpAttempts = user.OtpAttempts;
 
             await _userManager.UpdateAsync(identityUser);
         }
