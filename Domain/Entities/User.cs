@@ -7,4 +7,9 @@ public class User
     public string Email { get; set; } = null!;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+
+    // Password reset fields
+    public string? PasswordResetOtp { get; set; }
+    public DateTime? OtpExpiresAt { get; set; }
+    public int OtpAttempts { get; set; }
 }

@@ -1,8 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers;
-
+namespace API.Common;
 
 public class BaseController(IMediator mediator) : ControllerBase
 {
