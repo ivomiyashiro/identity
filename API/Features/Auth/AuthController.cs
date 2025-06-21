@@ -7,19 +7,17 @@ using Application.Features.Auth.Commands.Logout.Commands;
 using Application.Features.Auth.Commands.Register;
 using Application.Features.Auth.Commands.ResetPassword;
 using Application.Features.Auth.Commands.VerifyResetOtp;
-using Domain.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Features.Auth;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IMediator mediator, IAuthenticationService authService) : BaseController(mediator)
+public class AuthController(IMediator mediator) : BaseController(mediator)
 {
-    private readonly IAuthenticationService _authService = authService;
-
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IResult> Register([FromBody] RegisterRequest request)
@@ -38,6 +36,7 @@ public class AuthController(IMediator mediator, IAuthenticationService authServi
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting("Login")]
     [HttpPost("login")]
     public async Task<IResult> Login([FromBody] LoginRequest request)
     {
@@ -62,6 +61,7 @@ public class AuthController(IMediator mediator, IAuthenticationService authServi
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting("ForgotPassword")]
     [HttpPost("forgot-password")]
     public async Task<IResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
@@ -69,7 +69,7 @@ public class AuthController(IMediator mediator, IAuthenticationService authServi
         var result = await _mediator.Send(command);
 
         return result.IsSuccess
-            ? Results.Ok(result.Value)
+            ? Results.NoContent()
             : result.ToProblemDetails();
     }
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Infrastructure.Features.Identity;
@@ -56,7 +57,8 @@ public class AuthenticationService(
         if (user == null) return null;
 
         var otp = GenerateOtp();
-        user.PasswordResetOtp = otp;
+        var hashedOtp = HashOtp(otp);
+        user.PasswordResetOtp = hashedOtp;
         user.OtpExpiresAt = DateTime.UtcNow.AddMinutes(10);
         user.OtpAttempts = 0;
 
@@ -65,15 +67,15 @@ public class AuthenticationService(
         return otp;
     }
 
-    public async Task<string?> VerifyResetOtpAsync(string email, string otp, CancellationToken cancellationToken = default)
+    public async Task<string?> VerifyResetOtpAsync(string email, string hashedOtp, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+
         if (user?.PasswordResetOtp == null || user.OtpExpiresAt < DateTime.UtcNow)
             return null;
 
         if (user.OtpAttempts >= 3)
         {
-            // Clear OTP after max attempts
             user.PasswordResetOtp = null;
             user.OtpExpiresAt = null;
             user.OtpAttempts = 0;
@@ -81,14 +83,13 @@ public class AuthenticationService(
             return null;
         }
 
-        if (user.PasswordResetOtp != otp)
+        if (user.PasswordResetOtp != hashedOtp)
         {
             user.OtpAttempts++;
             await _userRepository.UpdateAsync(user, cancellationToken);
             return null;
         }
 
-        // OTP is valid, clear it and generate reset token
         user.PasswordResetOtp = null;
         user.OtpExpiresAt = null;
         user.OtpAttempts = 0;
@@ -126,11 +127,11 @@ public class AuthenticationService(
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "your-secret-key-here");
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
+            Subject = new ClaimsIdentity(
+            [
                 new Claim("userId", userId.ToString()),
                 new Claim("purpose", "password-reset")
-            }),
+            ]),
             Expires = DateTime.UtcNow.AddMinutes(30),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
@@ -140,32 +141,30 @@ public class AuthenticationService(
 
     private Guid? ValidateResetToken(string token)
     {
-        try
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "your-secret-key-here");
+
+        tokenHandler.ValidateToken(token, new TokenValidationParameters
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "your-secret-key-here");
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ClockSkew = TimeSpan.Zero
+        }, out SecurityToken validatedToken);
 
-            tokenHandler.ValidateToken(token, new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
+        var jwtToken = (JwtSecurityToken)validatedToken;
+        var userIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "userId")?.Value;
+        var purposeClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "purpose")?.Value;
 
-            var jwtToken = (JwtSecurityToken)validatedToken;
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "userId")?.Value;
-            var purposeClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "purpose")?.Value;
-
-            if (purposeClaim != "password-reset" || userIdClaim == null)
-                return null;
-
-            return Guid.Parse(userIdClaim);
-        }
-        catch
-        {
+        if (purposeClaim != "password-reset" || userIdClaim == null)
             return null;
-        }
+
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+    }
+
+    private static string HashOtp(string otp)
+    {
+        return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(otp)));
     }
 }
