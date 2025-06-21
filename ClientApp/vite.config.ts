@@ -4,6 +4,7 @@ import { env } from "process";
 import * as fs from "fs";
 import path from "path";
 import child_process from "child_process";
+import tailwindcss from "@tailwindcss/vite";
 
 // Get the certificate for the development server
 const baseFolder =
@@ -50,7 +51,7 @@ const target = env.ASPNETCORE_HTTPS_PORT
   : "https://localhost:7255";
 
 export default defineConfig(({ mode }) => ({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     proxy: {
       "/api": {
@@ -65,6 +66,11 @@ export default defineConfig(({ mode }) => ({
             cert: fs.readFileSync(certFilePath),
           }
         : undefined,
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
   build: {
     outDir: "../ClientApp/wwwroot",
