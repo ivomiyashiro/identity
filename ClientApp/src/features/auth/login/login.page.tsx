@@ -1,10 +1,19 @@
+import { useState } from "react";
 import { Link } from "react-router";
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
+
+import { useLoginPage } from "./login.page.hook";
+
 import { PageLayout } from "@/components/layouts/page.layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { InputError } from "@/components/ui/input-error";
 
 const LoginPage = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { form, onSubmit } = useLoginPage();
+
   return (
     <PageLayout title="Login" description="Login to your account">
       <div className="flex flex-col gap-8 md:max-w-md w-full">
@@ -14,15 +23,35 @@ const LoginPage = () => {
             Enter your email and password to login to your account
           </p>
         </div>
-        <form className="flex flex-col">
+        <form className="flex flex-col" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label>Email</Label>
-              <Input type="email" placeholder="Email" />
+              <Input
+                icon={MailIcon}
+                type="email"
+                placeholder="Email"
+                {...form.register("email")}
+              />
+              {form.formState.errors.email && (
+                <InputError error={form.formState.errors.email.message} />
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <Label>Password</Label>
-              <Input type="password" placeholder="Password" />
+              <Input
+                icon={LockIcon}
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                actionIcon={showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                action={() => {
+                  setShowPassword(!showPassword);
+                }}
+                {...form.register("password")}
+              />
+              {form.formState.errors.password && (
+                <InputError error={form.formState.errors.password.message} />
+              )}
               <Link
                 to="/forgot-password"
                 className="text-xs hover:underline text-primary self-end"

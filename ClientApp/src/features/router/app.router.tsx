@@ -10,21 +10,21 @@ const router = createBrowserRouter([
       {
         path: "/",
         lazy: () =>
-          import("@/features/landing/pages/landing.page").then((module) => ({
+          import("@/features/landing/landing.page").then((module) => ({
             element: <module.default />,
           })),
       },
       {
         path: "/login",
         lazy: () =>
-          import("@/features/auth/pages/login.page").then((module) => ({
+          import("@/features/auth/login/login.page").then((module) => ({
             element: <module.default />,
           })),
       },
       {
         path: "/register",
         lazy: () =>
-          import("@/features/auth/pages/register.page").then((module) => ({
+          import("@/features/auth/register/register.page").then((module) => ({
             element: <module.default />,
           })),
       },
@@ -36,7 +36,7 @@ const router = createBrowserRouter([
       {
         path: "/private",
         lazy: () =>
-          import("@/features/private/pages/private.page").then((module) => ({
+          import("@/features/private/private.page").then((module) => ({
             element: <module.default />,
           })),
       },
