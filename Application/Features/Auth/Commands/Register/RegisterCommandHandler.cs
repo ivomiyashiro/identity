@@ -35,8 +35,6 @@ public class RegisterCommandHandler(IUserRepository userRepository, IAuthenticat
                 Error.Conflict("Auth.AccountCreationFailed", "Failed to create user account"));
         }
 
-        await _authenticationService.SignInAsync(user, cancellationToken);
-
         var response = new RegisterCommandResponse(
             user.Id,
             user.FullName,
