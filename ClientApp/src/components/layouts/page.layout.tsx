@@ -2,31 +2,29 @@ import { cn } from "@/lib/utils/cn.util";
 import { ThemeButton } from "@/features/theme/components/theme-button";
 
 export const PageLayout = ({
-    children,
-    className,
-    title,
-    description,
+  children,
+  className,
+  title,
+  description,
 }: {
-    children: React.ReactNode;
-    className?: string;
-    title?: string;
-    description?: string;
+  children: React.ReactNode;
+  className?: string;
+  title?: string;
+  description?: string;
 }) => {
-    return (
-        <>
-            <title>{title}</title>
-            <meta name="description" content={description} />
-            <div className="flex h-screen">
-                <main
-                    className={cn(
-                        "flex flex-col items-center justify-center w-full p-6",
-                        className
-                    )}
-                >
-                    {children}
-                    <ThemeButton />
-                </main>
-            </div>
-        </>
-    );
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <main
+        className={cn(
+          "flex-col items-center justify-center w-full p-6 flex h-screen",
+          className
+        )}
+      >
+        {children}
+        <ThemeButton />
+      </main>
+    </>
+  );
 };
