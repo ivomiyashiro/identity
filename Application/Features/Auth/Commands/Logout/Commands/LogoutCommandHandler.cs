@@ -4,14 +4,14 @@ using SharedKernel.Result;
 
 namespace Application.Features.Auth.Commands.Logout.Commands;
 
-public class LogoutCommandHandler(IAuthenticationService authenticationService)
+public class LogoutCommandHandler(IAuthService authService)
     : IRequestHandler<LogoutCommand, Result>
 {
-    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly IAuthService _authService = authService;
 
     public async Task<Result> Handle(LogoutCommand request, CancellationToken cancellationToken)
     {
-        await _authenticationService.SignOutAsync(cancellationToken);
+        await _authService.SignOutAsync(cancellationToken);
         return Result.Success();
     }
 }

@@ -2,7 +2,7 @@ using Domain.Entities;
 
 namespace Domain.Services;
 
-public interface IAuthenticationService
+public interface IAuthService
 {
     Task<bool> CreateUserAccountAsync(User user, string password, CancellationToken cancellationToken = default);
     Task<bool> SignInAsync(User user, CancellationToken cancellationToken = default);

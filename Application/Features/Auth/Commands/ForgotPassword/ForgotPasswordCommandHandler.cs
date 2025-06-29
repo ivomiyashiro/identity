@@ -5,15 +5,15 @@ using SharedKernel.Result;
 
 namespace Application.Features.Auth.Commands.ForgotPassword;
 
-public class ForgotPasswordCommandHandler(IAuthenticationService authenticationService, IEmailService emailService)
+public class ForgotPasswordCommandHandler(IAuthService authService, IEmailService emailService)
     : IRequestHandler<ForgotPasswordCommand, Result>
 {
-    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly IAuthService _authService = authService;
     private readonly IEmailService _emailService = emailService;
 
     public async Task<Result> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
     {
-        var otp = await _authenticationService.ForgotPasswordAsync(request.Email, cancellationToken);
+        var otp = await _authService.ForgotPasswordAsync(request.Email, cancellationToken);
 
         if (otp == null)
         {

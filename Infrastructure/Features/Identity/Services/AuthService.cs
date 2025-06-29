@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.Services;
+using Google.Apis.Auth;
 using Infrastructure.Features.Identity.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -10,13 +11,13 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Infrastructure.Features.Identity;
+namespace Infrastructure.Features.Identity.Services;
 
-public class AuthenticationService(
+public class AuthService(
     UserManager<AppIdentityUser> userManager,
     SignInManager<AppIdentityUser> signInManager,
     IUserRepository userRepository,
-    IConfiguration configuration) : IAuthenticationService
+    IConfiguration configuration) : IAuthService
 {
     private readonly UserManager<AppIdentityUser> _userManager = userManager;
     private readonly SignInManager<AppIdentityUser> _signInManager = signInManager;

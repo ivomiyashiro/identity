@@ -4,14 +4,14 @@ using SharedKernel.Result;
 
 namespace Application.Features.Auth.Commands.ResetPassword;
 
-public class ResetPasswordCommandHandler(IAuthenticationService authenticationService)
+public class ResetPasswordCommandHandler(IAuthService authService)
     : IRequestHandler<ResetPasswordCommand, Result<ResetPasswordCommandResponse>>
 {
-    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly IAuthService _authService = authService;
 
     public async Task<Result<ResetPasswordCommandResponse>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
-        var success = await _authenticationService.ResetPasswordAsync(request.ResetToken, request.NewPassword, cancellationToken);
+        var success = await _authService.ResetPasswordAsync(request.ResetToken, request.NewPassword, cancellationToken);
 
         if (!success)
         {

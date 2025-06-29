@@ -4,14 +4,14 @@ using SharedKernel.Result;
 
 namespace Application.Features.Auth.Commands.VerifyResetOtp;
 
-public class VerifyResetOtpCommandHandler(IAuthenticationService authenticationService)
+public class VerifyResetOtpCommandHandler(IAuthService authService)
     : IRequestHandler<VerifyResetOtpCommand, Result<VerifyResetOtpCommandResponse>>
 {
-    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly IAuthService _authService = authService;
 
     public async Task<Result<VerifyResetOtpCommandResponse>> Handle(VerifyResetOtpCommand request, CancellationToken cancellationToken)
     {
-        var resetToken = await _authenticationService.VerifyResetOtpAsync(request.Email, request.Otp, cancellationToken);
+        var resetToken = await _authService.VerifyResetOtpAsync(request.Email, request.Otp, cancellationToken);
 
         if (resetToken == null)
         {

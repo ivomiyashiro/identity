@@ -2,6 +2,7 @@ using API.Common;
 using API.Extensions;
 using API.Features.Auth.Contracts;
 using Application.Features.Auth.Commands.ForgotPassword;
+using Application.Features.Auth.Commands.GoogleAuth;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout.Commands;
 using Application.Features.Auth.Commands.Register;
@@ -90,6 +91,19 @@ public class AuthController(IMediator mediator) : BaseController(mediator)
     public async Task<IResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
         var command = new ResetPasswordCommand(request.ResetToken, request.NewPassword);
+        var result = await _mediator.Send(command);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    [AllowAnonymous]
+    [EnableRateLimiting("GoogleAuth")]
+    [HttpPost("google")]
+    public async Task<IResult> GoogleAuth([FromBody] GoogleAuthRequest request)
+    {
+        var command = new GoogleAuthCommand(request.GoogleToken);
         var result = await _mediator.Send(command);
 
         return result.IsSuccess

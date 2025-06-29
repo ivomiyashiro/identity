@@ -5,15 +5,15 @@ using SharedKernel.Result;
 
 namespace Application.Features.Auth.Commands.Login;
 
-public class LoginCommandHandler(IUserRepository userRepository, IAuthenticationService authenticationService)
+public class LoginCommandHandler(IUserRepository userRepository, IAuthService authService)
     : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
 {
     private readonly IUserRepository _userRepository = userRepository;
-    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly IAuthService _authService = authService;
 
     public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var isValid = await _authenticationService.ValidateCredentialsAsync(request.Email, request.Password, cancellationToken);
+        var isValid = await _authService.ValidateCredentialsAsync(request.Email, request.Password, cancellationToken);
         if (!isValid)
         {
             return Result.Failure<LoginCommandResponse>(Error.Conflict("Auth.InvalidCredentials", "Invalid email or password"));

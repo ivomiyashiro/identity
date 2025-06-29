@@ -75,6 +75,18 @@ public static class ServiceExtensions
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                         QueueLimit = 0
                     }));
+
+            // Google auth attempts
+            options.AddPolicy("GoogleAuth", httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: $"google_auth_{httpContext.Connection.RemoteIpAddress}",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 15,
+                        Window = TimeSpan.FromMinutes(15),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
         });
 
         return services;

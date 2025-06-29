@@ -4,6 +4,7 @@ using Domain.Services;
 using Infrastructure.Features.Emails;
 using Infrastructure.Features.Identity;
 using Infrastructure.Features.Identity.Extensions;
+using Infrastructure.Features.Identity.Services;
 using Infrastructure.Persistance;
 using Infrastructure.Persistance.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -41,7 +42,8 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
 
         // Register services
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<IEmailService, EmailService>();
 
         return services;

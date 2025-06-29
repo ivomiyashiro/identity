@@ -6,11 +6,11 @@ using SharedKernel.Result;
 
 namespace Application.Features.Auth.Commands.Register;
 
-public class RegisterCommandHandler(IUserRepository userRepository, IAuthenticationService authenticationService)
+public class RegisterCommandHandler(IUserRepository userRepository, IAuthService authService)
     : IRequestHandler<RegisterCommand, Result<RegisterCommandResponse>>
 {
     private readonly IUserRepository _userRepository = userRepository;
-    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly IAuthService _authService = authService;
 
     public async Task<Result<RegisterCommandResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
@@ -28,7 +28,7 @@ public class RegisterCommandHandler(IUserRepository userRepository, IAuthenticat
             CreatedAt = DateTime.UtcNow
         };
 
-        var accountCreated = await _authenticationService.CreateUserAccountAsync(user, request.Password, cancellationToken);
+        var accountCreated = await _authService.CreateUserAccountAsync(user, request.Password, cancellationToken);
         if (!accountCreated)
         {
             return Result.Failure<RegisterCommandResponse>(
