@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputError } from "@/components/ui/input-error";
+import { GoogleAuthButton } from "@/features/auth/google-auth/google-auth-button";
 
 const RegisterPage = () => {
   const { form, onSubmit, isLoading } = useRegisterPage();
@@ -85,9 +86,7 @@ const RegisterPage = () => {
                 "Register"
               )}
             </Button>
-            <Button type="submit" variant="outline" className="w-full">
-              Register With Google
-            </Button>
+            <GoogleAuthButton />
           </div>
         </form>
         <div className="flex flex-col gap-2">
