@@ -14,9 +14,5 @@ export const PublicRoute = ({
     return <Navigate to={redirectTo} />;
   }
 
-  return (
-    <>
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 };

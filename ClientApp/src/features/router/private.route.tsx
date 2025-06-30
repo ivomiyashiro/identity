@@ -13,9 +13,5 @@ export const PrivateRoute = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  return (
-    <>
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 };
