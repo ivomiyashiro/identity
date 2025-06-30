@@ -15,11 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputError } from "@/components/ui/input-error";
-import { GoogleAuthButton } from "@/features/auth/google-auth/google-auth-button";
+import { GoogleAuthButton } from "@/features/auth/components/google-auth-button";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { form, onSubmit, isLoading } = useLoginPage();
+  const { form, onSubmit, isPending } = useLoginPage();
 
   return (
     <PageLayout title="Login" description="Login to your account">
@@ -68,8 +68,8 @@ const LoginPage = () => {
             </div>
           </div>
           <div className="flex flex-col gap-2 mt-6">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? (
                 <>
                   <Loader2Icon className="animate-spin" />
                   <span>Logging in...</span>

@@ -8,6 +8,7 @@ using Application.Features.Auth.Commands.Logout.Commands;
 using Application.Features.Auth.Commands.Register;
 using Application.Features.Auth.Commands.ResetPassword;
 using Application.Features.Auth.Commands.VerifyResetOtp;
+using Application.Features.Auth.Queries.GetMe;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -105,6 +106,17 @@ public class AuthController(IMediator mediator) : BaseController(mediator)
     {
         var command = new GoogleAuthCommand(request.GoogleToken);
         var result = await _mediator.Send(command);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemDetails();
+    }
+
+    [HttpGet("me")]
+    public async Task<IResult> GetCurrentUser()
+    {
+        var query = new GetMeQuery(User.Identity!);
+        var result = await _mediator.Send(query);
 
         return result.IsSuccess
             ? Results.Ok(result.Value)

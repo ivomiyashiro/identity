@@ -1,7 +1,6 @@
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.Services;
-using Google.Apis.Auth;
 using Infrastructure.Features.Identity.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
 
 namespace Infrastructure.Features.Identity.Services;
@@ -50,6 +50,15 @@ public class AuthService(
     {
         var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
         return result.Succeeded;
+    }
+
+    public async Task<User?> GetCurrentUserAsync(IIdentity? identity, CancellationToken cancellationToken = default)
+    {
+        if (identity?.IsAuthenticated != true || identity.Name == null)
+            return null;
+
+        var user = await _userRepository.GetByEmailAsync(identity.Name, cancellationToken);
+        return user;
     }
 
     public async Task<string?> ForgotPasswordAsync(string email, CancellationToken cancellationToken = default)

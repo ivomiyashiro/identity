@@ -1,136 +1,118 @@
-import { failure, success } from "../utils/result.util";
-import { ProblemDetailsError } from "./api-error.http";
-import type { ApiClientConfig, ApiResult, RequestConfig } from "./types.http";
-import { handleErrorResponse, parseSuccessResponse } from "./utilts.http";
+import { tryCatch, type Result } from "../utils/try-catch.util";
+import type {
+  ApiClientConfig,
+  ProblemDetails,
+  RequestConfig,
+} from "./types.http";
+import { parseSuccessResponse } from "./utilts.http";
 
 class HttpClient {
-    private readonly baseURL: string;
-    private readonly defaultOptions: ApiClientConfig;
+  private readonly baseURL: string;
+  private readonly defaultOptions: ApiClientConfig;
 
-    constructor(baseURL: string = "/api", defaultOptions: ApiClientConfig = {}) {
-        this.baseURL = baseURL;
-        this.defaultOptions = {
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json, application/problem+json",
-            },
-            ...defaultOptions,
-        };
+  constructor(baseURL: string = "/api", defaultOptions: ApiClientConfig = {}) {
+    this.baseURL = baseURL;
+    this.defaultOptions = {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, application/problem+json",
+      },
+      ...defaultOptions,
+    };
+  }
+
+  async request<T = unknown>(
+    endpoint: string,
+    options: RequestConfig = {}
+  ): Promise<Result<T, Error>> {
+    const url = `${this.baseURL}${endpoint}`;
+    const config: RequestConfig = {
+      ...this.defaultOptions,
+      ...options,
+      headers: {
+        ...this.defaultOptions.headers,
+        ...options.headers,
+      },
+    };
+
+    const { data, error } = await tryCatch(fetch(url, config));
+
+    if (error) {
+      return { data: null, error };
     }
 
-    async request<T = unknown>(
-        endpoint: string,
-        options: RequestConfig = {}
-    ): Promise<T> {
-        const url = `${this.baseURL}${endpoint}`;
-        const config: RequestConfig = {
-            ...this.defaultOptions,
-            ...options,
-            headers: {
-                ...this.defaultOptions.headers,
-                ...options.headers,
-            },
-        };
+    const { data: parsedData, error: parsedError } = await tryCatch(
+      parseSuccessResponse<T>(data)
+    );
 
-        try {
-            const response = await fetch(url, config);
-
-            if (!response.ok) {
-                await handleErrorResponse(response);
-            }
-
-            // Handle successful responses
-            return await parseSuccessResponse<T>(response);
-        } catch (error) {
-            if (error instanceof ProblemDetailsError) {
-                throw error;
-            }
-
-            throw new Error(`Network error: ${(error as Error).message}`);
-        }
+    if (parsedError) {
+      return { data: null, error: parsedError };
     }
 
-    // HTTP methods with proper typing
-    async get<T = unknown>(
-        endpoint: string,
-        options: Omit<RequestConfig, "method" | "body"> = {}
-    ): Promise<ApiResult<T>> {
-        try {
-            const response = await this.request<T>(endpoint, {
-                ...options,
-                method: "GET",
-            });
-            return success(response);
-        } catch (error) {
-            return failure(error as Error | ProblemDetailsError);
-        }
+    if (!data.ok) {
+      const problemDetails = parsedData as ProblemDetails;
+      return { data: null, error: new Error(problemDetails.detail) };
     }
 
-    async post<D = unknown, T = unknown>(
-        endpoint: string,
-        data?: D,
-        options: Omit<RequestConfig, "method" | "body"> = {}
-    ): Promise<ApiResult<T>> {
-        try {
-            const response = await this.request<T>(endpoint, {
-                ...options,
-                method: "POST",
-                body: data ? JSON.stringify(data) : undefined,
-            });
-            return success(response);
-        } catch (error) {
-            return failure(error as Error | ProblemDetailsError);
-        }
-    }
+    return { data: parsedData, error: null };
+  }
 
-    async put<D = unknown, T = unknown>(
-        endpoint: string,
-        data?: D,
-        options: Omit<RequestConfig, "method" | "body"> = {}
-    ): Promise<ApiResult<T>> {
-        try {
-            const response = await this.request<T>(endpoint, {
-                ...options,
-                method: "PUT",
-                body: data ? JSON.stringify(data) : undefined,
-            });
-            return success(response);
-        } catch (error) {
-            return failure(error as Error | ProblemDetailsError);
-        }
-    }
+  // HTTP methods with proper typing
+  async get<T = unknown>(
+    endpoint: string,
+    options: Omit<RequestConfig, "method" | "body"> = {}
+  ): Promise<Result<T, Error>> {
+    return await this.request<T>(endpoint, {
+      ...options,
+      method: "GET",
+    });
+  }
 
-    async patch<D = unknown, T = unknown>(
-        endpoint: string,
-        data?: D,
-        options: Omit<RequestConfig, "method" | "body"> = {}
-    ): Promise<ApiResult<T>> {
-        try {
-            const response = await this.request<T>(endpoint, {
-                ...options,
-                method: "PATCH",
-                body: data ? JSON.stringify(data) : undefined,
-            });
-            return success(response);
-        } catch (error) {
-            return failure(error as Error | ProblemDetailsError);
-        }
-    }
+  async post<D = unknown, T = unknown>(
+    endpoint: string,
+    data?: D,
+    options: Omit<RequestConfig, "method" | "body"> = {}
+  ): Promise<Result<T, Error>> {
+    return await this.request<T>(endpoint, {
+      ...options,
+      method: "POST",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
 
-    async delete<T = unknown>(
-        endpoint: string,
-        options: Omit<RequestConfig, "method" | "body"> = {}
-    ): Promise<ApiResult<T>> {
-        try {
-            const response = await this.request<T>(endpoint, {
-                ...options,
-                method: "DELETE",
-            });
-            return success(response);
-        } catch (error) {
-            return failure(error as Error | ProblemDetailsError);
-        }
-    }
+  async put<D = unknown, T = unknown>(
+    endpoint: string,
+    data?: D,
+    options: Omit<RequestConfig, "method" | "body"> = {}
+  ): Promise<Result<T, Error>> {
+    return await this.request<T>(endpoint, {
+      ...options,
+      method: "PUT",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async patch<D = unknown, T = unknown>(
+    endpoint: string,
+    data?: D,
+    options: Omit<RequestConfig, "method" | "body"> = {}
+  ): Promise<Result<T, Error>> {
+    return await this.request<T>(endpoint, {
+      ...options,
+      method: "PATCH",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async delete<T = unknown>(
+    endpoint: string,
+    options: Omit<RequestConfig, "method" | "body"> = {}
+  ): Promise<Result<T, Error>> {
+    return await this.request<T>(endpoint, {
+      ...options,
+      method: "DELETE",
+    });
+  }
 }
 
 export const httpClient = new HttpClient();

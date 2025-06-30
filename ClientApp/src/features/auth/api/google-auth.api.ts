@@ -7,10 +7,9 @@ type GoogleAuthRequest = {
 
 export type GoogleAuthResponse = {
   id: string;
-  fullName: string;
   email: string;
-  createdAt: string;
-  isNewUser: boolean;
+  fullName: string;
+  createdAt: Date;
 };
 
 export const googleAuth = async (

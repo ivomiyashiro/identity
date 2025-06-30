@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils/cn.util";
 import { ThemeButton } from "@/features/theme/components/theme-button";
-import { GoogleSignInPopup } from "@/features/auth/google-auth/google-auth-popup";
 
 export const PageLayout = ({
   children,
@@ -25,7 +24,6 @@ export const PageLayout = ({
       >
         {children}
         <ThemeButton />
-        <GoogleSignInPopup />
       </main>
     </>
   );

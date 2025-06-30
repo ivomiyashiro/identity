@@ -3,15 +3,16 @@ import { Loader2Icon, LockIcon, MailIcon, UserIcon } from "lucide-react";
 
 import { useRegisterPage } from "./register.page.hook";
 
+import { GoogleAuthButton } from "@/features/auth/components/google-auth-button";
+
 import { PageLayout } from "@/components/layouts/page.layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputError } from "@/components/ui/input-error";
-import { GoogleAuthButton } from "@/features/auth/google-auth/google-auth-button";
 
 const RegisterPage = () => {
-  const { form, onSubmit, isLoading } = useRegisterPage();
+  const { form, onSubmit, isPending } = useRegisterPage();
 
   return (
     <PageLayout title="Register" description="Register to your account">
@@ -76,8 +77,8 @@ const RegisterPage = () => {
             </div>
           </div>
           <div className="flex flex-col gap-2 mt-6">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? (
                 <>
                   <Loader2Icon className="animate-spin" />
                   <span>Registering...</span>
@@ -86,7 +87,7 @@ const RegisterPage = () => {
                 "Register"
               )}
             </Button>
-            <GoogleAuthButton />
+            <GoogleAuthButton text="signup" />
           </div>
         </form>
         <div className="flex flex-col gap-2">

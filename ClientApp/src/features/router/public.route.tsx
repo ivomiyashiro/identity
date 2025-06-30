@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router";
-import { useAuthStore } from "@/features/auth/store/auth.store";
+import { useMeCache } from "../auth/hooks/cache/use-me.cache";
 
 export const PublicRoute = ({
   redirectIfAuthenticated = false,
@@ -8,9 +8,9 @@ export const PublicRoute = ({
   redirectIfAuthenticated?: boolean;
   redirectTo?: string;
 }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useMeCache();
 
-  if (redirectIfAuthenticated && isAuthenticated) {
+  if (redirectIfAuthenticated && user) {
     return <Navigate to={redirectTo} />;
   }
 

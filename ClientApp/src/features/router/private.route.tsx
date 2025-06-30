@@ -1,11 +1,15 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-import { useAuthStore } from "@/features/auth/store/auth.store";
+import { useMeCache } from "../auth/hooks/cache/use-me.cache";
 
-export const PrivateRoute = ({ redirectTo = "/login" }: { redirectTo?: string }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+export const PrivateRoute = ({
+  redirectTo = "/login",
+}: {
+  redirectTo?: string;
+}) => {
+  const user = useMeCache();
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 

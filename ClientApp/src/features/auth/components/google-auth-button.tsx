@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { type VariantProps } from "class-variance-authority";
 import { buttonVariants } from "@/components/ui/button";
-import { useGoogleAuthButton } from "./google-auth-button.hook";
+import { useGoogleAuth } from "../hooks/common/use-google-auth";
 
 interface GoogleAuthButtonProps extends VariantProps<typeof buttonVariants> {
   text?: "signin" | "signup";
@@ -16,14 +16,14 @@ export const GoogleAuthButton = ({
   disabled = false,
   className,
 }: GoogleAuthButtonProps) => {
-  const { handleGoogleSignIn, isLoading } = useGoogleAuthButton();
+  const { showGoogleSignIn, isPending } = useGoogleAuth();
 
   return (
     <Button
       variant={variant}
       size={size}
-      disabled={disabled || isLoading}
-      onClick={handleGoogleSignIn}
+      disabled={disabled || isPending}
+      onClick={showGoogleSignIn}
       className={className}
       type="button"
     >
@@ -47,7 +47,7 @@ export const GoogleAuthButton = ({
           />
         </g>
       </svg>
-      {isLoading
+      {isPending
         ? `${text === "signin" ? "Signing in" : "Signing up"} with Google...`
         : `${text === "signin" ? "Sign in" : "Sign up"} with Google`}
     </Button>
